@@ -23,7 +23,7 @@ This server is one of three linked projects:
    — the `cisco.nd` Ansible collection; where the documented deviations are discovered.
 2. **The vault** — `OBSIDIAN_VAULT_PATH` (typically `~/Obsidian/ND`) — the notes this
    server serves. Its own `CLAUDE.md` defines the note frontmatter schema this server
-   parses (`id`, `endpoints`, `tags`, `found`/`fixed`, `status`, `severity`, `guidance`);
+   parses (`id`, `endpoints`, `tags`, `found`/`fixed`/`fixed_candidate`, `status`, `severity`, `guidance`);
    keep `Note`/the tools in sync with that schema.
 3. **This repo** — the MCP server.
 
@@ -112,13 +112,18 @@ endpoints:
 tags: [deviation, bug]
 status: open          # open | workaround | fixed
 found: 4.2.1          # ND release the bug was found in; always major.minor.patch
-fixed: 4.3.0          # release it was fixed in; leave empty if still present
+fixed: 4.3.0          # release it was fixed in (lab-verified); leave empty if still present
+fixed_candidate:      # release where spec/release-note evidence says fixed; NOT lab-verified
 severity: high
 guidance: "..."       # one-line actionable takeaway, echoed in every list/search result
 ---
 ```
 
-`found`/`fixed` drive the version-aware tools (see Architecture). `id` and
+`found`/`fixed` drive the version-aware tools (see Architecture). `fixed_candidate` is
+**informational only**: it rides along in every list/search/find result (and as
+`Note.fixed_candidate_version`) but never feeds `affects_version`, so a bug the spec
+says is fixed still surfaces for that version until someone lab-verifies it and
+promotes the value to `fixed`. `id` and
 `guidance` are surfaced in every listing and `id` backs `get_bug_by_id`; both are
 optional and absent/empty values read as `None`. `fixed` is
 commonly an **empty string** — that means "not yet fixed", not "unknown", and is

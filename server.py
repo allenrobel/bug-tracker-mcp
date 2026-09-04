@@ -21,7 +21,8 @@ Frontmatter is optional. If you add it, this convention unlocks the best tooling
     tags: [deviation, bug]
     status: open          # open | workaround | fixed
     found: 4.2.1
-    fixed: 4.3.0
+    fixed: 4.3.0          # lab-verified; drives version filtering
+    fixed_candidate:      # spec/release-note evidence only; informational, does NOT filter
     severity: high
     guidance: "..."       # one-line actionable takeaway, surfaced in every listing
     ---
@@ -108,6 +109,16 @@ class Note:
     def fixed_version(self) -> tuple[int, ...] | None:
         """Parsed `fixed` version, or None if absent/empty (never fixed)."""
         return _parse_version(self.meta.get("fixed"))
+
+    @property
+    def fixed_candidate_version(self) -> tuple[int, ...] | None:
+        """Parsed `fixed_candidate` version, or None if absent/empty.
+
+        Evidence short of lab verification (spec diff, release notes) says the bug is
+        fixed here. Informational only — it never feeds `affects_version`, so a
+        candidate still shows up in version-filtered results until `fixed` is set.
+        """
+        return _parse_version(self.meta.get("fixed_candidate"))
 
     def affects_version(self, target: tuple[int, ...]) -> bool:
         """Whether this bug is present in the given ND version.
@@ -246,6 +257,7 @@ def list_bugs() -> list[dict]:
             "severity": n.meta.get("severity"),
             "found": n.meta.get("found"),
             "fixed": n.meta.get("fixed"),
+            "fixed_candidate": n.meta.get("fixed_candidate"),
             "guidance": n.guidance,
         }
         for n in notes
@@ -296,6 +308,7 @@ def search_bugs(query: str, max_results: int = 10) -> list[dict]:
             "endpoints": n.endpoints,
             "found": n.meta.get("found"),
             "fixed": n.meta.get("fixed"),
+            "fixed_candidate": n.meta.get("fixed_candidate"),
             "guidance": n.guidance,
             "snippet": _snippet(n.body, _first_term_in(n.body, terms)),
         }
@@ -342,6 +355,7 @@ def find_bugs_for_endpoint(endpoint: str, version: str | None = None) -> list[di
                     "severity": n.meta.get("severity"),
                     "found": n.meta.get("found"),
                     "fixed": n.meta.get("fixed"),
+                    "fixed_candidate": n.meta.get("fixed_candidate"),
                     "origin": "unknown" if n.found_version is None else "known",
                     "guidance": n.guidance,
                     "snippet": _snippet(n.body, endpoint),
@@ -377,6 +391,7 @@ def find_bugs_for_version(version: str) -> list[dict]:
             "severity": n.meta.get("severity"),
             "found": n.meta.get("found"),
             "fixed": n.meta.get("fixed"),
+            "fixed_candidate": n.meta.get("fixed_candidate"),
             "origin": "unknown" if n.found_version is None else "known",
             "guidance": n.guidance,
         }
