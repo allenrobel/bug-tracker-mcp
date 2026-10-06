@@ -19,7 +19,7 @@ automatically (see caching below); no server restart needed.
 
 This server is one of three linked projects:
 
-1. **ansible-nd** — `/Users/arobel/repos/ansible/collections/ansible_collections/cisco/nd`
+1. **ansible-nd** — `~/ansible_collections/cisco/nd`
    — the `cisco.nd` Ansible collection; where the documented deviations are discovered.
 2. **The vault** — `OBSIDIAN_VAULT_PATH` (typically `~/Obsidian/ND`) — the notes this
    server serves. Its own `CLAUDE.md` defines the note frontmatter schema this server
