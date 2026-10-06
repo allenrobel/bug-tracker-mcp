@@ -18,7 +18,8 @@ Frontmatter is optional. If you add it, this convention unlocks the best tooling
     endpoints:
       - /api/v1/infra/...
       - /sedgeapi/v1/...
-    tags: [deviation, bug]
+    tags: [deviation, bug]   # only: bug | deviation | undocumented
+    topics: [ios-xe, svi]    # optional, open vocabulary; searched like tags
     status: open          # open | workaround | fixed
     found: 4.2.1
     fixed: 4.3.0          # lab-verified; drives version filtering
@@ -87,6 +88,19 @@ class Note:
         if isinstance(raw, str):
             raw = [raw]
         return [str(t).strip().lower() for t in raw]
+
+    @property
+    def topics(self) -> list[str]:
+        """Open-vocabulary keywords (platform, object family, behaviour class)."""
+        raw = self.meta.get("topics") or []
+        if isinstance(raw, str):
+            raw = [raw]
+        return [str(t).strip().lower() for t in raw if str(t).strip()]
+
+    @property
+    def keywords(self) -> list[str]:
+        """Tags plus topics — what search_bugs scores at the tag weight."""
+        return self.tags + self.topics
 
     @property
     def bug_id(self) -> str | None:
@@ -253,6 +267,7 @@ def list_bugs() -> list[dict]:
             "id": n.bug_id,
             "endpoints": n.endpoints,
             "tags": n.tags,
+            "topics": n.topics,
             "status": n.meta.get("status"),
             "severity": n.meta.get("severity"),
             "found": n.meta.get("found"),
@@ -266,10 +281,10 @@ def list_bugs() -> list[dict]:
 
 @mcp.tool()
 def search_bugs(query: str, max_results: int = 10) -> list[dict]:
-    """Full-text search across bug notes (title, tags, and body).
+    """Full-text search across bug notes (title, tags/topics, and body).
 
     The query is split into words and each is scored independently (name×5,
-    tags×3, body×1), so "ghost groups" matches a note mentioning either word. A
+    tags/topics×3, body×1), so "ghost groups" matches a note mentioning either word. A
     note containing the full phrase contiguously gets an extra boost, keeping
     exact-phrase matches ranked highest. Returns matches ranked by relevance,
     each with a short snippet. Use this for free-text questions like "syslog
@@ -287,13 +302,13 @@ def search_bugs(query: str, max_results: int = 10) -> list[dict]:
         score = 0
         for term in terms:
             score += name.count(term) * 5
-            score += sum(t.count(term) for t in n.tags) * 3
+            score += sum(t.count(term) for t in n.keywords) * 3
             score += body.count(term)
         # Phrase bonus: reward a contiguous match of the full multi-word query
         # so exact-phrase hits still outrank scattered single-word hits.
         if len(terms) > 1:
             score += name.count(q) * 5
-            score += sum(t.count(q) for t in n.tags) * 3
+            score += sum(t.count(q) for t in n.keywords) * 3
             score += body.count(q)
         if score:
             scored.append((score, n))
@@ -420,7 +435,7 @@ def get_bug_by_id(bug_id: str) -> dict:
 
     `id` is the stable kebab-case slug in a note's frontmatter (e.g.
     "svi-routingtag-type-mismatch"). Use this to resolve a back-link left
-    elsewhere — a `# workaround: <id>` comment in code, or a cross-note link — to
+    elsewhere — a `# TODO(X.Y.Z) <id>` marker in code, or a cross-note link — to
     the documented bug. Unlike `get_bug`, which takes the vault-relative path
     (and therefore breaks if the note is renamed), the `id` is meant to be stable
     for the life of the bug.
