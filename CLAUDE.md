@@ -50,6 +50,9 @@ model, and an mtime-based cache:
 - **`Note` dataclass** — wraps one `.md` file. Its `endpoints` and `tags`
   properties normalize frontmatter that may be a string *or* a list, and accept
   either `endpoint`/`endpoints` keys. All endpoint/tag matching is lowercased.
+  `topics` normalizes the optional open-vocabulary `topics` key the same way
+  (string *or* list, lowercased, blank entries dropped); `keywords` is
+  `tags + topics`, the combined list `search_bugs` scores at the tag weight.
   `bug_id` (the stable `id` slug) and `guidance` (a one-line takeaway) return
   `None` when the frontmatter key is absent or empty.
 - **`_load_note` / `_all_notes` + `_cache`** — notes are cached by `mtime`. A
@@ -88,8 +91,9 @@ rides along without a follow-up `get_bug`.
 
 `search_bugs` lowercases the query and splits it on whitespace into terms.
 Each term is scored independently and the scores are **summed** (OR semantics —
-a note matches if *any* term hits), with per-field weights **name ×5, tags ×3,
-body ×1** counting every occurrence. So `"ghost groups"` matches a note
+a note matches if *any* term hits), with per-field weights **name ×5,
+tags/topics ×3, body ×1** counting every occurrence (`Note.keywords` supplies
+the tags and topics together, so a topic hit scores exactly like a tag hit). So `"ghost groups"` matches a note
 mentioning either word, not only the contiguous phrase. For multi-word queries,
 a **contiguous-phrase bonus** re-applies those same weights to the full query
 string, so an exact-phrase hit outranks scattered single-word hits. A
@@ -109,7 +113,8 @@ listings):
 id: syslog-server-validation   # stable kebab-case slug; key for get_bug_by_id and back-links
 endpoints:
   - /api/v1/infra/...
-tags: [deviation, bug]
+tags: [deviation, bug]   # closed vocabulary: bug | deviation | undocumented
+topics: [ios-xe, svi]    # optional, open vocabulary; searched like tags
 status: open          # open | workaround | fixed
 found: 4.2.1          # ND release the bug was found in; always major.minor.patch
 fixed: 4.3.0          # release it was fixed in (lab-verified); leave empty if still present
@@ -118,6 +123,13 @@ severity: high
 guidance: "..."       # one-line actionable takeaway, echoed in every list/search result
 ---
 ```
+
+`tags` classifies the note and is limited to `bug`, `deviation`, and
+`undocumented`. `topics` is the free-form companion: keywords for platform,
+object family, or behaviour class (e.g. `ios-xe`, `svi`). It may be a string or a
+list, is optional, and feeds `search_bugs` at the same ×3 weight as `tags`. Of
+the tools only `list_bugs` returns `topics`; `search_bugs` matches on it but,
+like the two `find_bugs_for_*` tools, does not echo it in results.
 
 `found`/`fixed` drive the version-aware tools (see Architecture). `fixed_candidate` is
 **informational only**: it rides along in every list/search/find result (and as
