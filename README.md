@@ -19,7 +19,44 @@ version (if any) fixes the behavior.  Notes might also contain workaround(s).
 
 ### 2. Setup sync with the ND Vault (vault should be in `$HOME/Obsidian/ND`)
 
-### 3. Install the LaunchDaemon
+### 3. Clone this repository and install its dependencies
+
+The server needs Python 3.14 or later and [uv](https://docs.astral.sh/uv/). The
+LaunchDaemon template in step 4 expects this repository at
+`$HOME/repos/mcp/bug-tracker-mcp`, with `uv` installed inside the project's
+virtual environment at `.venv/bin/uv`:
+
+```bash
+mkdir -p $HOME/repos/mcp
+cd $HOME/repos/mcp
+git clone https://github.com/allenrobel/bug-tracker-mcp.git
+cd bug-tracker-mcp
+python3.14 -m venv .venv
+.venv/bin/pip install uv
+.venv/bin/uv sync
+```
+
+`uv sync` installs the dependencies pinned in `uv.lock` into `.venv`. It leaves
+`uv` itself in place.
+
+Check that the server starts, then stop it with Ctrl-C:
+
+```bash
+OBSIDIAN_VAULT_PATH=$HOME/Obsidian/ND .venv/bin/uv run server.py
+```
+
+It should report `Uvicorn running on http://0.0.0.0:8001`.
+
+If you already have a standalone `uv` (for example from the uv installer or
+Homebrew), you can use that instead. Skip the `venv` and `pip` commands and run
+`uv sync`, which creates `.venv` and downloads Python 3.14 if it is missing.
+Then, in step 4, point the plist at your `uv` as described there.
+
+Do not move or rename the repository directory afterwards. The scripts in
+`.venv/bin` and the installed plist both contain its absolute path. If you have
+to move it, delete `.venv`, repeat this step, and reinstall the plist.
+
+### 4. Install the LaunchDaemon
 
 The server runs as a system LaunchDaemon, so it starts at boot without anyone
 logging in. The `UserName` key makes it run as your account, not as root. (The
@@ -37,8 +74,8 @@ The template also assumes the following. Edit the file if your host differs:
 
 - This repository is at `/Users/YOUR_USERNAME/repos/mcp/bug-tracker-mcp`
   (`ProgramArguments` and `WorkingDirectory`).
-- `uv` is installed inside the project's virtual environment, at `.venv/bin/uv`.
-  If your `uv` lives elsewhere, use the path printed by `command -v uv` as the
+- `uv` is at `.venv/bin/uv` inside this repository, as set up in step 3. If you
+  use a standalone `uv` instead, use the path printed by `command -v uv` as the
   first `ProgramArguments` entry.
 - The vault is at `/Users/YOUR_USERNAME/Obsidian/ND` (`OBSIDIAN_VAULT_PATH`).
 - The account's primary group is `staff` (`GroupName`; check with `id -gn`).
@@ -70,7 +107,7 @@ launchctl bootout gui/$(id -u)/com.bug-tracker-mcp
 rm $HOME/Library/LaunchAgents/com.bug-tracker-mcp.plist
 ```
 
-### 4. Check, restart, and update the server
+### 5. Check, restart, and update the server
 
 Check that it is running, and read its log:
 
@@ -93,7 +130,8 @@ kill $(launchctl print system/com.bug-tracker-mcp | awk '/^\tpid = /{print $3}')
 ```
 
 Edits to the vault are picked up without a restart, but changes to `server.py`
-are not. After a `git pull`, restart the server.
+are not. After a `git pull`, restart the server. `uv run` installs any changed
+dependencies when it starts, so no separate `uv sync` is needed.
 
 A restart does not re-read the plist. To change the installed plist, or to
 uninstall, unload it first (then repeat the install commands if reinstalling):
@@ -103,7 +141,7 @@ sudo launchctl bootout system/com.bug-tracker-mcp
 sudo rm /Library/LaunchDaemons/com.bug-tracker-mcp.plist
 ```
 
-### 5. Edit Claude Code's config on the client Mac to point to this MCP server
+### 6. Edit Claude Code's config on the client Mac to point to this MCP server
 
 - edit $HOME/.claude.json
 - Search for the `mcpServers` block
@@ -118,7 +156,7 @@ sudo rm /Library/LaunchDaemons/com.bug-tracker-mcp.plist
   }
 ```
 
-### 6. Restart Claude Code and check the MCP server status using the `/mcp` slash command
+### 7. Restart Claude Code and check the MCP server status using the `/mcp` slash command
 
 ## MCP Server Logic Diagram
 

@@ -155,6 +155,10 @@ file: `YOUR_USERNAME` and `YOUR_TMPDIR` are placeholders, and the absolute paths
 to `.venv/bin/uv`, `server.py`, and `OBSIDIAN_VAULT_PATH` must match the host.
 Keep it in sync with what is actually installed when the deployment changes.
 
+On the host, `uv` is not installed globally: `.venv` is created with
+`python3.14 -m venv` and `uv` is pip-installed into it, which is why the plist
+points at `.venv/bin/uv` (README step 3). `uv sync` keeps that `uv` in place.
+
 A running server does not pick up code changes. After pulling on the host,
 restart it with `sudo launchctl kickstart -k system/com.bug-tracker-mcp` (or,
 without `sudo`, kill the process and let `KeepAlive` respawn it). See
