@@ -78,7 +78,7 @@ containment* match `ep in e or e in ep` for path fragments — plus an optional
 `find_bugs_for_version` (every bug present in a given ND release), `get_bug`
 (full content by vault-relative name without extension, e.g. `infra/syslog-bug`),
 and `get_bug_by_id` (full content by the stable `id` slug — scans `_all_notes`
-for a case-insensitive match; use it to resolve `# workaround: <id>` back-links
+for a case-insensitive match; use it to resolve `# TODO(X.Y.Z) <id>` back-links
 that survive file renames). The two version-aware paths raise `ValueError` on a
 malformed version and flag empty-`found` bugs with `origin: "unknown"`. Every
 list/search result now carries `id` and `guidance` so the actionable takeaway
