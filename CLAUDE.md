@@ -144,8 +144,18 @@ distinct from an empty `found` (unknown origin).
 
 ## Deployment
 
-Runs as a macOS LaunchAgent (`com.nd-bugs-mcp.plist`) bound to `0.0.0.0:8001`
-at path `/mcp` over streamable-HTTP, so Claude Code on other machines can reach
-it by hostname. The plist hardcodes absolute paths to `.venv/bin/uv`,
-`server.py`, and `OBSIDIAN_VAULT_PATH` — these must be edited per-host. See
-`README.md` for the full install + client-config steps.
+Runs as a macOS system LaunchDaemon (label `com.bug-tracker-mcp`, installed to
+`/Library/LaunchDaemons/com.bug-tracker-mcp.plist`) bound to `0.0.0.0:8001` at
+path `/mcp` over streamable-HTTP, so Claude Code on other machines can reach it
+by hostname. A daemon starts at boot without a GUI login; the plist's `UserName`
+key keeps it running as the vault owner rather than root.
+
+The `com.bug-tracker-mcp.plist` in this repo is a **template**, not the installed
+file: `YOUR_USERNAME` and `YOUR_TMPDIR` are placeholders, and the absolute paths
+to `.venv/bin/uv`, `server.py`, and `OBSIDIAN_VAULT_PATH` must match the host.
+Keep it in sync with what is actually installed when the deployment changes.
+
+A running server does not pick up code changes. After pulling on the host,
+restart it with `sudo launchctl kickstart -k system/com.bug-tracker-mcp` (or,
+without `sudo`, kill the process and let `KeepAlive` respawn it). See
+`README.md` for the full install, restart, and client-config steps.

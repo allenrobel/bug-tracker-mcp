@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template for a system LaunchDaemon. Do not install it as-is: fill in the
+  placeholders first. See "Install the LaunchDaemon" in README.md.
+-->
 <plist version="1.0">
 <dict>
   <key>Label</key>
   <string>com.bug-tracker-mcp</string>
+  <key>UserName</key>
+  <string>YOUR_USERNAME</string>
+  <key>GroupName</key>
+  <string>staff</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/arobel/repos/mcp/bug-tracker-mcp/.venv/bin/uv</string>
+    <string>/Users/YOUR_USERNAME/repos/mcp/bug-tracker-mcp/.venv/bin/uv</string>
     <string>run</string>
-    <string>/Users/arobel/repos/mcp/bug-tracker-mcp/server.py</string>
+    <string>/Users/YOUR_USERNAME/repos/mcp/bug-tracker-mcp/server.py</string>
   </array>
   <key>WorkingDirectory</key>
-  <string>/Users/arobel/repos/mcp/bug-tracker-mcp</string>
+  <string>/Users/YOUR_USERNAME/repos/mcp/bug-tracker-mcp</string>
   <key>EnvironmentVariables</key>
   <dict>
+    <key>HOME</key>
+    <string>/Users/YOUR_USERNAME</string>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>TMPDIR</key>
+    <string>YOUR_TMPDIR</string>
     <key>OBSIDIAN_VAULT_PATH</key>
-    <string>/Users/arobel/Obsidian/ND</string>
+    <string>/Users/YOUR_USERNAME/Obsidian/ND</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>
@@ -25,8 +38,8 @@
   <key>ThrottleInterval</key>
   <integer>30</integer>
   <key>StandardOutPath</key>
-  <string>/tmp/bug-tracker-mcp.log</string>
+  <string>/Users/YOUR_USERNAME/Library/Logs/mcp/bug-tracker-mcp.log</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/bug-tracker-mcp.err.log</string>
+  <string>/Users/YOUR_USERNAME/Library/Logs/mcp/bug-tracker-mcp.err.log</string>
 </dict>
 </plist>
