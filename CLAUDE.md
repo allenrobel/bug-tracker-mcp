@@ -44,7 +44,7 @@ Requires Python >= 3.14. There is no test suite.
 
 ## Architecture
 
-Everything lives in `server.py` (~380 lines). Five FastMCP tools, one data
+Everything lives in `server.py` (~460 lines). Six FastMCP tools, one data
 model, and an mtime-based cache:
 
 - **`Note` dataclass** — wraps one `.md` file. Its `endpoints` and `tags`
@@ -93,8 +93,9 @@ takeaway rides along without a follow-up `get_bug`.
 Each term is scored independently and the scores are **summed** (OR semantics —
 a note matches if *any* term hits), with per-field weights **name ×5,
 tags/topics ×3, body ×1** counting every occurrence (`Note.keywords` supplies
-the tags and topics together, so a topic hit scores exactly like a tag hit). So `"ghost groups"` matches a note
-mentioning either word, not only the contiguous phrase. For multi-word queries,
+the tags and topics together, so a topic hit scores exactly like a tag hit). So
+`"ghost groups"` matches a note mentioning either word, not only the contiguous
+phrase. For multi-word queries,
 a **contiguous-phrase bonus** re-applies those same weights to the full query
 string, so an exact-phrase hit outranks scattered single-word hits. A
 single-word query reduces to one term with no bonus — identical to the original
