@@ -84,8 +84,8 @@ and `get_bug_by_id` (full content by the stable `id` slug — scans `_all_notes`
 for a case-insensitive match; use it to resolve `# TODO(X.Y.Z) <id>` back-links
 that survive file renames). The two version-aware paths raise `ValueError` on a
 malformed version and flag empty-`found` bugs with `origin: "unknown"`. Every
-list/search result now carries `id` and `guidance` so the actionable takeaway
-rides along without a follow-up `get_bug`.
+list/search result now carries `id`, `topics`, and `guidance` so the actionable
+takeaway rides along without a follow-up `get_bug`.
 
 ### Search scoring
 
@@ -127,9 +127,9 @@ guidance: "..."       # one-line actionable takeaway, echoed in every list/searc
 `tags` classifies the note and is limited to `bug`, `deviation`, and
 `undocumented`. `topics` is the free-form companion: keywords for platform,
 object family, or behaviour class (e.g. `ios-xe`, `svi`). It may be a string or a
-list, is optional, and feeds `search_bugs` at the same ×3 weight as `tags`. Of
-the tools only `list_bugs` returns `topics`; `search_bugs` matches on it but,
-like the two `find_bugs_for_*` tools, does not echo it in results.
+list, is optional, and feeds `search_bugs` at the same ×3 weight as `tags`.
+Every list/search/find result carries `topics` (an empty list when the key is
+absent), though only `search_bugs` matches on it.
 
 `found`/`fixed` drive the version-aware tools (see Architecture). `fixed_candidate` is
 **informational only**: it rides along in every list/search/find result (and as
