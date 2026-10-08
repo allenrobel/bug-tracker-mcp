@@ -63,9 +63,9 @@ model, and an mtime-based cache:
 - **`_is_relevant`** — the single gatekeeper for which files surface: `.md` only,
   excluding `.obsidian`/`.trash`/`.git`/`Templates` dirs, Obsidian Sync's
   `*.sync-conflict-*.md` files, and project-tooling filenames in
-  `EXCLUDED_FILENAMES` (`CLAUDE.md`/`README.md`/`MEMORY.md`/`AGENTS.md`, matched
-  case-insensitively) — these guide agents working in the vault but are never bug
-  notes, and would otherwise show up as fieldless entries in `list_bugs`. Any new
+  `EXCLUDED_FILENAMES` (`CLAUDE.md`/`README.md`/`MEMORY.md`/`AGENTS.md`/
+  `cdets_status_updates.md`, matched case-insensitively) — these guide agents
+  working in the vault, or log relayed CDETS status, but are never bug notes, and would otherwise show up as fieldless entries in `list_bugs`. Any new
   tool must funnel file selection through this (or `_all_notes`), not raw `rglob`.
 - **Version logic** — `_parse_version` turns `major.minor.patch` strings into
   comparable int tuples (`None` if empty/unparseable); `_vcmp` zero-pads before

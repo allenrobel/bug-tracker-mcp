@@ -56,9 +56,16 @@ EXCLUDED_DIRS = {".obsidian", ".trash", ".git", "Templates"}
 # Obsidian Sync creates "*.sync-conflict-*.md" files; keep them out of results.
 EXCLUDED_SUFFIXES = (".sync-conflict",)
 # Project-tooling markdown that lives at the vault root but is never a bug note —
-# e.g. the CLAUDE.md / README that guides agents working in the vault. Matched by
-# filename (case-insensitive) anywhere in the tree.
-EXCLUDED_FILENAMES = {"claude.md", "readme.md", "memory.md", "agents.md"}
+# e.g. the CLAUDE.md / README that guides agents working in the vault, and the
+# weekly CDETS relay log (cdets_status_updates.md) that feeds the notes' cdets
+# mappings. Matched by filename (case-insensitive) anywhere in the tree.
+EXCLUDED_FILENAMES = {
+    "claude.md",
+    "readme.md",
+    "memory.md",
+    "agents.md",
+    "cdets_status_updates.md",
+}
 
 mcp = FastMCP("bug-tracker-mcp")
 
